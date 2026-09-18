@@ -67,3 +67,12 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+# Visual Studio 项目专属（本项目新增）
+.vs/
+x64/
+x86/
+Debug/
+Release/
+*.user
+*.suo
+*.tlog

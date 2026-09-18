@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="libarary.vcxproj" Id="50b439b9-67be-4771-9de3-6dc4ec209a3d" />
+</Solution>
