@@ -5,6 +5,7 @@ class Book
 {
 private:
 	std::string name;
+	std::stirng studentname;
 	std::string publisher;
 	std::string author;
 	std::string isbn;
