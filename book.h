@@ -12,7 +12,7 @@ private:
 	double price;
 	int page;
 	bool available;
-	int studentnumber;
+	long long studentnumber;
 	std::string initialdate;
 	std::string returndate;
 	std::string borrower;
@@ -32,8 +32,8 @@ public:
 	std::string getISBN() const;
 	double getPrice() const;
 	int getPage() const;
-	void GetOut(std::string name,int StuNumber, std::string initialdate, std::string returndate);
-	void GetIn(std::string name, int StuNumber);
+	void GetOut(std::string name,long long StuNumber, std::string initialdate, std::string returndate);
+	void GetIn(std::string name, long long StuNumber);
     void PrintBookInformation() const;
 
 private:

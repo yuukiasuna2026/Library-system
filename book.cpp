@@ -118,7 +118,7 @@ bool Book::isAvailable() const
 {
 	return available;
 }
-void Book::GetOut(std::string name , int StuNumber,std::string initialdate,std::string returndate)
+void Book::GetOut(std::string name ,long long StuNumber,std::string initialdate,std::string returndate)
 {
 	if(available)
 	{
@@ -138,7 +138,7 @@ void Book::GetOut(std::string name , int StuNumber,std::string initialdate,std::
 	}
 
 }
-void Book::GetIn(std::string name, int StuNumber)
+void Book::GetIn(std::string name, long long StuNumber)
 {
 	if (!available)
 	{
