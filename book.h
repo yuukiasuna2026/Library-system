@@ -5,14 +5,14 @@ class Book
 {
 private:
 	std::string name;
-	std::stirng studentname;
+	std::string studentname;
 	std::string publisher;
 	std::string author;
 	std::string isbn;
 	double price;
 	int page;
 	bool available;
-	int StuNumber;
+	int studentnumber;
 	std::string initialdate;
 	std::string returndate;
 	std::string borrower;
@@ -25,7 +25,7 @@ public:
 	void setISBN(const std::string ISBN);
 	void setPrice(const double price);
 	void setPage(const int page);
-	bool isAvailable();
+	bool isAvailable() const;
 	std::string getName() const;
 	std::string getPublisher() const;
 	std::string getAuthor() const;
@@ -34,6 +34,8 @@ public:
 	int getPage() const;
 	void GetOut(std::string name,int StuNumber, std::string initialdate, std::string returndate);
 	void GetIn(std::string name, int StuNumber);
+    void PrintBookInformation() const;
+
 private:
 	bool checkISBN(std::string ISBN);
 };

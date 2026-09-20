@@ -44,10 +44,10 @@ bool Book::checkISBN(std::string isbn)
 }
 Book::Book(std::string name, std::string publisher, std::string author, std::string isbn, double price, int page,bool available)
 {
-	this->name = name;
-	this->publisher = publisher;
-	this->author = author;
-	this->isbn = isbn;
+	this->name =std::move(name);
+	this->publisher = std::move(publisher);
+	this->author = std::move(author);
+	this->isbn = std::move(isbn);
 	this->price = price;
 	this->page = page;
 	this->available = available;
@@ -61,25 +61,34 @@ void Book::setName(const std::string name)
 {
 	this->name = name;
 }
-void Book::setPublisher(const std::stirng pubisher)
+void Book::setPublisher(const std::string publisher)
 {
-	this->publisher = publiser;
+	this->publisher = publisher;
 }
-void Book::setAuthor(const std::string Author)
+void Book::setAuthor(const std::string author)
 {
-	: author (std::move(Author));
+	this ->author = std::move(author);
 }
 void Book::setISBN(const std::string ISBN )
 {
-	: isbn (std::move(ISBN));
+	bool check = checkISBN(ISBN);
+	if(check)
+	{
+		this -> isbn  = ISBN;
+	}
+	else
+	{
+		std::cout << "Sorry,ISBN is wrong!" << std::endl;
+	}
+
 }
 void Book::setPrice(const double Price)
 {
-	: price (price);
+	this -> price = Price;
 }
 void Book::setPage(const int Page)
 {
-	: page (Page);
+	this -> page = Page ;
 }
 std::string Book::getName() const
 {
@@ -89,7 +98,7 @@ std::string Book::getPublisher() const
 {
 	return publisher;
 }
-std::stringBook::getAuthor() const
+std::string Book::getAuthor() const
 {
 	return author;
 }
@@ -111,12 +120,12 @@ bool Book::isAvailable() const
 }
 void Book::GetOut(std::string name , int StuNumber,std::string initialdate,std::string returndate)
 {
-	studentname = std::move(name);
-	studentnumber = StuNumber;
-	initialdate = std::move(initialdate);
-	returndate = std::move(returndate);
 	if(available)
 	{
+		studentname = std::move(name);
+		studentnumber = StuNumber;
+		this->initialdate = std::move(initialdate);
+		this->returndate = std::move(returndate);
 		available = false;
 	}
 	else
@@ -158,4 +167,14 @@ void Book::GetIn(std::string name, int StuNumber)
 	{
 		std::cout << "This book has not been borrowed!" << std::endl;
 	}
+}
+void Book::PrintBookInformation() const
+{
+	std::cout << "Book name is :" << name << std::endl;
+	std::cout << "Book publisher is :" << publisher << std::endl;
+	std::cout << "Book author is :" << author << std::endl;
+	std::cout << "Book ISBN is :" << isbn <<std::endl;
+	std::cout << "Book price is :" << price << std::endl;
+	std::cout << "Book page is :" << page << std::endl;
+	std::cout << "Book available is :" << (available ? "Yes" : "No!It has benn borrowed") << std::endl;
 }
