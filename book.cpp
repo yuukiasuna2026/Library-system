@@ -39,6 +39,8 @@ bool Book::checkISBN(std::string isbn)
 			}
 		}
 	}
+	if (isbn[12] < '0' || isbn[12] > '9')
+        return false;
 	int check = (10 - sum % 10 ) % 10 ;
 	return check == (isbn[12] -  '0' );
 }
@@ -60,6 +62,14 @@ Book::Book(std::string name, std::string publisher, std::string author, std::str
 void Book::setName(const std::string name)
 {
 	this->name = name;
+}
+void Book::setStuname(const std::string stuname)
+{
+	this->studentname = std::move(stuname);
+}
+void Book::setStunumber(const long long stunumber)
+{
+	this->studentnumber = stunumber;
 }
 void Book::setPublisher(const std::string publisher)
 {
@@ -94,6 +104,14 @@ std::string Book::getName() const
 {
 	return name;
 }
+std::string Book::getStuname() const
+{
+	return studentname;
+}
+long long Book::getStunumnber() const
+{
+	return studentnumber;
+}
 std::string Book::getPublisher() const
 {
 	return publisher;
@@ -113,6 +131,10 @@ double Book::getPrice() const
 int Book::getPage() const
 {
 	return page;
+}
+std::string Book::getReturndate() const
+{
+	return returndate;
 }
 bool Book::isAvailable() const
 {
