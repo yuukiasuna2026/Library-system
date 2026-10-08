@@ -46,17 +46,21 @@ bool Book::checkISBN(std::string isbn)
 }
 Book::Book(std::string name, std::string publisher, std::string author, std::string isbn, double price, int page,bool available)
 {
-	this->name =std::move(name);
-	this->publisher = std::move(publisher);
-	this->author = std::move(author);
-	this->isbn = std::move(isbn);
-	this->price = price;
-	this->page = page;
-	this->available = available;
+	
 	bool check = checkISBN(isbn);
-	if (!check)
+	if (check)
 	{
-		std::cout << "ISBN is wrong!" << std::endl;
+		this->name =std::move(name);
+		this->publisher = std::move(publisher);
+		this->author = std::move(author);
+		this->isbn = std::move(isbn);
+		this->price = price;
+		this->page = page;
+		this->available = available;
+	}
+	else
+	{
+		std::cout << "Sorry,ISBN is wrong!" << std::endl;
 	}
 }
 void Book::setName(const std::string name)

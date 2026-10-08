@@ -46,17 +46,21 @@ int main()
 
     Library lib1;
     Library lib2("schoollibrary","SWUST","123-456");
-    Book b1("C++ from learn to death","Publisher of China","Niko","9780123456789",99.99,325,true);
-    Book b2("My lover","Publisher of American","Trump","9780987654321",88.88,799,true);
+    Book b1("C++ from learn to death","Publisher of China","Niko","9780306406157",99.99,325,true);
+    Book b2("My lover","Publisher of American","Trump","9783161484100",88.88,799,true);
     lib2.addBook(b1);
     lib2.printAll();
     lib2.addBook(b2);
     lib2.printAll();
     lib2.findBook("978987654321");
     lib2.findISBN("C++ from learn to death");
-    Student s1();
+    Student s1;
     Student s2("Mask","history",5120258989);
     Student s3("Trump","computer",5120256767);
+    s2.borrow(b1,"2026.09.19","2026.09.26");
+    s3.borrow(b2,"2026.09.20","2026.09.27");
+    s2.returnbook(b1,"2026.09.26");
+    s3.returnbook(b2,"2026.09.30");
     
     return 0;
 }

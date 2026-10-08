@@ -48,7 +48,7 @@ void Student::returnbook(Book& book , string returndate)
         else
         {
             long long price = book.getPrice();
-            long long pay = 1/10 * price * (date1- date2);
+            long long pay = (price / 10.0) * (date1- date2);
             std::cout << "Sorry, you're mot return this book in time ! We have the rule followed as :" << std::endl;
             std::cout << "For each day you are not return , you must pay 1/10 money of the book !" << std::endl;
             std::cout << "So , you have to pay :" << pay << std::endl;
@@ -57,7 +57,7 @@ void Student::returnbook(Book& book , string returndate)
     else
     {
         int month1 = (returndate[5] - '0') * 10 + (returndate[6] - '0');
-        int month2 = (s[5] - '0') * 10 + (s[6] = '0');
+        int month2 = (s[5] - '0') * 10 + (s[6] - '0');
         int day1 = (returndate[8] - '0') * 10 + (returndate[9] - '0');
         int day2 = (s[8] - '0') * 10 + (s[9] - '0');
         int t = 0;
@@ -81,7 +81,7 @@ void Student::returnbook(Book& book , string returndate)
         else
         {
             long long price = book.getPrice();
-            long long pay = 1/10 * price * (0 - t);
+            long long pay = (price / 10.0) * (0 - t);
             std::cout << "Sorry, you're mot return this book in time ! We have the rule followed as :" << std::endl;
             std::cout << "For each day you are not return , you must pay 1/10 money of the book !" << std::endl;
             std::cout << "So , you have to pay :" << pay << std::endl;

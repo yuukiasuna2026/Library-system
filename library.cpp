@@ -44,6 +44,7 @@ std::string Library::findISBN(const std::string& name)
             return books[i].getISBN();
         }
     }
+    return "";
 }
 Book* Library::findBook(const std::string& ISBN)
 {
@@ -60,8 +61,9 @@ Book* Library::findBook(const std::string& ISBN)
     else
     {
         std::cout << "The isbn maybe wrong!" << std::endl;
-        return 0;
+        return nullptr;
     }
+    return nullptr;
 }
 void Library::printAll() const
 {
@@ -81,15 +83,25 @@ void Library::borrowBook(std::string bookname ,std::string stuname,long long stu
 }
 void Library::returnBook(std::string bookname , std::string stuname , long long stunumber , std::string returndate)
 {
-    std::string s = findISBN (bookname);
-    Book* b = findBook(s);
-    std::string s = b -> getReturndate();
+    std::string isbn = findISBN (bookname);
+    Book* b = findBook(isbn);
+    if (b == nullptr)
+    {
+        return;
+    }
+
+    std::string dueDate = b -> getReturndate();
     // 不考虑年份不同的情况了
-    if(s[5] == returndate[5] && s[6] == returndate[6])
+    if(dueDate[5] == returndate[5] && dueDate[6] == returndate[6])
     {
         int date1 = (returndate[8] - '0') * 10 + (returndate[9] - '0');
-        int date2 = (s[8] - '0') * 10 + (s[9] - '0');
+        int date2 = (dueDate[8] - '0') * 10 + (dueDate[9] - '0');
         int t = date2 - date1;
+        if(b == nullptr)
+        {
+            std::cout << "The book is not found!" << std::endl;
+            return;
+        }
         b -> GetIn(stuname,stunumber);
         if(t >= 0 )
         {
@@ -98,7 +110,7 @@ void Library::returnBook(std::string bookname , std::string stuname , long long 
         else
         {
             long long price = b -> getPrice();
-            long long pay = 1/10 * price * (date1- date2);
+            long long pay = (price * 1LL / 10) * (date1 - date2);
             std::cout << "Sorry, you're mot return this book in time ! We have the rule followed as :" << std::endl;
             std::cout << "For each day you are not return , you must pay 1/10 money of the book !" << std::endl;
             std::cout << "So , you have to pay :" << pay << std::endl;
@@ -107,9 +119,9 @@ void Library::returnBook(std::string bookname , std::string stuname , long long 
     else
     {
         int month1 = (returndate[5] - '0') * 10 + (returndate[6] - '0');
-        int month2 = (s[5] - '0') * 10 + (s[6] = '0');
+        int month2 = (dueDate[5] - '0') * 10 + (dueDate[6] - '0');
         int day1 = (returndate[8] - '0') * 10 + (returndate[9] - '0');
-        int day2 = (s[8] - '0') * 10 + (s[9] - '0');
+        int day2 = (dueDate[8] - '0') * 10 + (dueDate[9] - '0');
         int t = 0;
         b -> GetIn(stuname,stunumber);
         // 统一一个月30天 
@@ -130,7 +142,7 @@ void Library::returnBook(std::string bookname , std::string stuname , long long 
         else
         {
             long long price = b -> getPrice();
-            long long pay = 1/10 * price * (0 - t);
+            long long pay = (price * 1LL / 10) * (0 - t);
             std::cout << "Sorry, you're mot return this book in time ! We have the rule followed as :" << std::endl;
             std::cout << "For each day you are not return , you must pay 1/10 money of the book !" << std::endl;
             std::cout << "So , you have to pay :" << pay << std::endl;
