@@ -1,18 +1,15 @@
 #pragma once
-#include<string>
-#include "book.h"
+#include "User.h"
 using namespace std;
-class Student
+
+class Student : public User
 {
-private:
-    string name;
-    string department;
-    long long number;
-    int max;
-    int borrowcount;
 public:
+    // 构造函数
     Student();
-    Student(string mane,string department , long long number);
-    void borrow(Book& book,string initialdate,string returndate);
-    void returnbook(Book& book , string returndate);
+    Student(string name,string department , long long ID);
+    
+    // 获取相关的数据
+    double getDivisor() const override;
+    string getUserType() const override;
 };

@@ -8,10 +8,13 @@
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
+                "-std=c++17", // 🌟 加上这一行，拥抱现代 C++
                 "main.cpp",
                 "book.cpp",
                 "library.cpp",
-                "student.cpp",
+                "Student.cpp",
+                "Teacher.cpp",
+                "User.cpp",   // 🌟 补上漏掉的文件！(注意大小写要和实际文件名完全一致)
                 "-o",
                 "${workspaceFolder}\\main.exe"
             ],

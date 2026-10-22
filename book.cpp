@@ -1,6 +1,7 @@
 #include<iostream>
 #include"book.h"
 
+// 构造函数
 Book::Book()
 {
 	name = "";
@@ -10,39 +11,6 @@ Book::Book()
 	price = 0.00;
 	page = 0;
 	available = true;
-}
-bool Book::checkISBN(std::string isbn)
-{
-	int sum = 0;
-	if (isbn.length() != 13)
-	{
-		return false;
-	}
-	else 
-	{
-		for (int i = 0;i < 12; i++)
-		{
-			if (isbn[i] < '0' || isbn[i] > '9')
-			{
-				return false;
-			}
-			else
-			{
-				if ((i + 1 ) % 2 == 0)
-				{
-					sum += (isbn[i] - '0') * 3;
-				}
-				else
-				{
-					sum += isbn[i] - '0';
-				}
-			}
-		}
-	}
-	if (isbn[12] < '0' || isbn[12] > '9')
-        return false;
-	int check = (10 - sum % 10 ) % 10 ;
-	return check == (isbn[12] -  '0' );
 }
 Book::Book(std::string name, std::string publisher, std::string author, std::string isbn, double price, int page,bool available)
 {
@@ -63,6 +31,8 @@ Book::Book(std::string name, std::string publisher, std::string author, std::str
 		std::cout << "Sorry,ISBN is wrong!" << std::endl;
 	}
 }
+
+// 设置类函数
 void Book::setName(const std::string name)
 {
 	this->name = name;
@@ -104,6 +74,8 @@ void Book::setPage(const int Page)
 {
 	this -> page = Page ;
 }
+
+// 获取类函数
 std::string Book::getName() const
 {
 	return name;
@@ -143,6 +115,41 @@ std::string Book::getReturndate() const
 bool Book::isAvailable() const
 {
 	return available;
+}
+
+// 主要功能实现函数
+bool Book::checkISBN(std::string isbn)
+{
+	int sum = 0;
+	if (isbn.length() != 13)
+	{
+		return false;
+	}
+	else 
+	{
+		for (int i = 0;i < 12; i++)
+		{
+			if (isbn[i] < '0' || isbn[i] > '9')
+			{
+				return false;
+			}
+			else
+			{
+				if ((i + 1 ) % 2 == 0)
+				{
+					sum += (isbn[i] - '0') * 3;
+				}
+				else
+				{
+					sum += isbn[i] - '0';
+				}
+			}
+		}
+	}
+	if (isbn[12] < '0' || isbn[12] > '9')
+        return false;
+	int check = (10 - sum % 10 ) % 10 ;
+	return check == (isbn[12] -  '0' );
 }
 void Book::GetOut(std::string name ,long long StuNumber,std::string initialdate,std::string returndate)
 {
