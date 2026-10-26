@@ -37,13 +37,13 @@ void Book::setName(const std::string name)
 {
 	this->name = name;
 }
-void Book::setStuname(const std::string stuname)
+void Book::setUsername(const std::string Username)
 {
-	this->studentname = std::move(stuname);
+	this->name = std::move(Username);
 }
-void Book::setStunumber(const long long stunumber)
+void Book::setUserID(const long long IDnum)
 {
-	this->studentnumber = stunumber;
+	this->ID = IDnum;
 }
 void Book::setPublisher(const std::string publisher)
 {
@@ -80,13 +80,13 @@ std::string Book::getName() const
 {
 	return name;
 }
-std::string Book::getStuname() const
+std::string Book::getUsername() const
 {
-	return studentname;
+	return name;
 }
-long long Book::getStunumnber() const
+long long Book::getUserID() const
 {
-	return studentnumber;
+	return ID;
 }
 std::string Book::getPublisher() const
 {
@@ -151,12 +151,12 @@ bool Book::checkISBN(std::string isbn)
 	int check = (10 - sum % 10 ) % 10 ;
 	return check == (isbn[12] -  '0' );
 }
-void Book::GetOut(std::string name ,long long StuNumber,std::string initialdate,std::string returndate)
+void Book::GetOut(std::string Username_ ,long long IDnum,std::string initialdate,std::string returndate)
 {
 	if(available)
 	{
-		studentname = std::move(name);
-		studentnumber = StuNumber;
+		Username = std::move(Username_);
+		ID = IDnum;
 		this->initialdate = std::move(initialdate);
 		this->returndate = std::move(returndate);
 		available = false;
@@ -164,30 +164,30 @@ void Book::GetOut(std::string name ,long long StuNumber,std::string initialdate,
 	else
 	{
 		std::cout << "This book has been borrowed!" << std::endl;
-		std::cout << "The borrower is" << studentname << std::endl;
-		std::cout << "The student number is" << studentnumber << std::endl;
+		std::cout << "The borrower is" << Username << std::endl;
+		std::cout << "The ID is" << ID << std::endl;
 		std::cout << "The initial date is" << initialdate << std::endl;
 		std::cout << "The return date is" << returndate << std::endl;
 	}
 
 }
-void Book::GetIn(std::string name, long long StuNumber)
+void Book::GetIn(std::string Username_, long long IDnum)
 {
 	if (!available)
 	{
-		if(studentname == name && studentnumber == StuNumber)
+		if(Username_ == Username && ID == IDnum)
 		{
 			available = true;
-			studentname = "";
-			studentnumber = 0;
+			name = "";
+			ID = 0;
 			initialdate = "";
 			returndate = "";
 		}
-		else if(studentname != name && studentnumber == StuNumber)
+		else if(Username_ != Username && ID == IDnum)
 		{
 			std::cout << "The student number is correct,but the name is wrong!" << std::endl;
 		}
-		else if(studentname == name && studentnumber != StuNumber)
+		else if(Username_ == Username && ID != IDnum)
 		{
 			std::cout << "The name is correct,but the student number is wrong!" << std::endl;
 		}

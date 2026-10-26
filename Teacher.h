@@ -12,4 +12,6 @@ public:
     // 获取数据
     double getDivisor() const override;
     string getUserType() const override;
+    void borrow(Book& book , string initialdate , string returndate) override;
+    void returnbook(Book& book , string returndate) override;
 };

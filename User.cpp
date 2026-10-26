@@ -60,7 +60,7 @@ string User::getUserType() const
 // 公共接口
 void User::borrow(Book& book , string initialdate , string returndate)
 {
-    if(getCurrent() < getMax())
+    if(getCurrent() < getMax()) // 按照各自的权限
     {
         book.GetOut(getName() , getID() , initialdate , returndate);
         current++;
@@ -70,61 +70,60 @@ void User::borrow(Book& book , string initialdate , string returndate)
         cout << "很抱歉，您已经到达最大的借阅数量！请先将已借阅的图书归还！" << endl;
     }
 }
+
+// 利用daysfromcivil算法改进日期问题
+int User::daysFromCivil(int y,int m,int d)
+{
+    y -= m <= 2; // bool类型 true和false隐形转化为 0和 1
+    int era = (y >= 0 ? y : y - 399) / 400; // 400为一纪元 处理公元前负数年份情况
+    unsigned yoe = y - era * 400; // 当前的year处于纪元的第几年 year of era
+    unsigned doy = (153 * (m + (m >= 2 ? -3 : 9)) + 2) / 5 + d - 1; // 当前处于该年的第几天 day of year
+    unsigned doe = yoe * 365 + yoe / 4 - yoe / 100 + doy; // 该纪元第几天 day of era
+    return era * 146097 + (int)doe - 719468;
+}
 void User::returnbook(Book& book , string returndate)
 {
-    string s = book.getReturndate();
-    // 不考虑年份不同的情况了
-    if(s[5] == returndate[5] && s[6] == returndate[6])
+    // 规定的还书日期
+    string returndate_old = book.getReturndate(); // 日期 xxxx-xx-xx
+    int y_old = (returndate_old[0] - '0') * 10 * 10 * 10 + (returndate_old[1] - '0') * 10 * 10 + (returndate_old[2] - '0') * 10 + (returndate_old[3] - '0');
+    int m_old = (returndate_old[5] - '0') * 10 + (returndate_old[6] - '0');
+    int d_old = (returndate_old[8] - '0') * 10 + (returndate_old[9] - '0');
+    int old = daysFromCivil(y_old,m_old,d_old);
+
+    // 现在的日期
+    string year_sub = returndate.substr(0,4);
+    string mmonth_sub = returndate.substr(5,2);
+    string day_sub = returndate.substr(8,2);
+    int y_now = stoi(year_sub);
+    int m_now = stoi(mmonth_sub);
+    int d_now = stoi(day_sub);
+    int now = daysFromCivil(y_now,m_now,d_now);
+
+    int day = now - old;
+    if(day <= 0)
     {
-        int date1 = (returndate[8] - '0') * 10 + (returndate[9] - '0');
-        int date2 = (s[8] - '0') * 10 + (s[9] - '0');
-        int t = date2 - date1;
-        book.GetIn(getName(), getID());
-        current--;
-        if(t >= 0 )
-        {
-            cout << "您成功归还了该图书！" << endl;
-        }
-        else
-        {
-            double price = book.getPrice();
-            double pay = price * getDivisor() * (date1- date2);
-            cout << "很抱歉，您未能按时归还该图书！根据图书馆的相关规定：" << endl;
-            cout << "      对于每一天未按时归还的图书,您必须支付图书价格的" << getDivisor() << "费用！" << endl;
-            cout << "因此，您需要支付：" << fixed << setprecision(2) << pay << endl;
-        }
+        book.GetIn(getName(),getID());
+        cout << "恭喜您！您成功在规定时间内完成还书！" << endl;
     }
     else
     {
-        int month1 = (returndate[5] - '0') * 10 + (returndate[6] - '0');
-        int month2 = (s[5] - '0') * 10 + (s[6] - '0');
-        int day1 = (returndate[8] - '0') * 10 + (returndate[9] - '0');
-        int day2 = (s[8] - '0') * 10 + (s[9] - '0');
-        int t = 0;
-        book.GetIn(getName(), getID());
-        current--;
-        // 统一一个月30天 
-        if(day2 - day1 < 0)
+        double pay = day * book.getPrice() * getDivisor();
+        cout << "非常抱歉，您未能按规定日期完成还书！根据相关规定：" << '\n' << "       因为您是：" << getUserType() << "所以您将按照每本书每天" << getDivisor() << "的比例支付超时费用！" << endl;
+        if(pay >= book.getPrice())
         {
-            month1--;
-            day2 += 30;
-            t = (day2 - day1) + (month2 - month1) * 30;
+            cout << "由于您逾期时间为：" << day << "所付金额超出了本书价格！" << '\n' << "因此，您只需支付本书的价格！" << endl;
+            cout << "本书价格为：" << fixed << setprecision(2) << book.getPrice() << endl;
         }
         else
         {
-            t = (day2 - day1) + (month2 -month1) * 30;
-        }
-        if(t >= 0 )
-        {
-            cout << "您成功归还了该图书！" << endl;
-        }
-        else
-        {
-            double price = book.getPrice();
-            double pay = price * getDivisor() * (0 - t);
-            cout << "很抱歉，您未能按时归还该图书！根据图书馆的相关规定：" << endl;
-            cout << "      对于每一天未按时归还的图书,您必须支付图书价格的" << getDivisor() << "费用！" << endl;
-            cout << "因此，您需要支付：" << fixed << setprecision(2) << pay << endl;
+            cout << "您需要支付的金额为：" << fixed << setprecision(2) << pay << endl;
         }
     }
+}
+void User::getUserInformation() const
+{
+    cout << "该用户的名字：" << name << endl;
+    cout << "该用户的院系：" << department << endl;
+    cout << "该用户的ID：" << ID << endl;
+    cout << "该用户的借阅数：" << current << "/" << max << endl;
 }
