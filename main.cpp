@@ -1,91 +1,214 @@
 #include <iostream>
 #include <string>
+#include <limits>
+#ifdef _WIN32
 #include <windows.h>
+#endif
 #include "book.h"
 #include "library.h"
 #include "Student.h"
 #include "Teacher.h"
 using namespace std;
 
+static void eatLine() // 吃掉一行残留输入（cin >> 之后用）
+{
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+}
+
 int main()
 {
+#ifdef _WIN32
     SetConsoleOutputCP(CP_UTF8);  // 输出 UTF-8
     SetConsoleCP(CP_UTF8);        // 输入也 UTF-8（需要 cin 中文时）
-    // 实验1测试
+#endif
+    // 实验六：启动加载——从 books.txt / users.txt 恢复数据（文件缺失则从空数据开始）
+    Library lib;
+    lib.loadData();
 
-    // Book b1;
-    // Book b2("Object Oriented Programming","People of China publisher", "YuukiAsuna", "9780123456789", 325799.99 , 114514, true);
-    // std::cout << "The information of b2 is as followd: " << std::endl;
-    // b2.PrintBookInformation();
-    // std::cout << "The information of b1 must be setted! And the information of b1 is as followd:" << std::endl;
-    // b1.setName("C++ from beginner to death");
-    // b1.setPublisher("People of America publisher");
-    // b1.setAuthor("Trump");
-    // b1.setISBN("9789876543210");
-    // b1.setPrice(114514.99);
-    // b1.setPage(799);
-    // std::cout << "The information of b1 is as followed:" << std::endl;
-    // b1.PrintBookInformation();
-    // std::cout << "Is the book b1 and b2 available?" << std::endl;
-    // std::cout << "The book b1 is " << (b1.isAvailable() ? "available" : "not available") << std::endl;
-    // std::cout << "The book b2 is " << (b2.isAvailable() ? "available" : "not available") << std::endl;
-    // std::cout << "Now,let's check the function of get the single book information!" << std::endl;
-    // std::cout << "The name of b1 is :" << b1.getName() << std::endl;
-    // std::cout << "The publisher of b1 is :" << b1.getPublisher() << std::endl;
-    // std::cout << "The author of b1 is :" << b1.getAuthor() << std::endl;
-    // std::cout << "The ISBN of b1 is :" << b1.getISBN() << std::endl;
-    // std::cout << "The price of b1 is :" << b1.getPrice() << std::endl;
-    // std::cout << "The page of b1 is :" << b1.getPage() << std::endl;
-    // std::cout << "Then,let's check the function of borrowing and returning books!" << std::endl;
-    // std::cout << "Now,Trump is borrowing the book b2!" << std::endl;
-    // b2.GetOut("Trump",5120267878,"2026.09.19","2026.09.26");
-    // std::cout << "The book b2 is :" << (b2.isAvailable() ? "available" : "not available") << std::endl;
-    // std::cout << "Mask tries to borrow the book b2!" << std::endl;
-    // b2.GetOut("Mask",520269191,"2026.09.20","2026.09.27");
-    // std::cout <<"Trump is returning the book b2" << std::endl;
-    // b2.GetIn("Trump",5120267878);
-    // std::cout << "The book b2 is :" << (b2.isAvailable() ? "available" : "not available") << std::endl;
+    int choice = -1;
+    while(true)
+    {
+        cout << "\n========== 图书馆借阅管理系统 ==========" << '\n';
+        cout << " 1.添加图书    2.删除图书    3.查询图书    4.列出全部图书" << '\n';
+        cout << " 5.添加用户    6.删除用户    7.修改图书    8.修改用户" << '\n';
+        cout << " 9.登录       10.登出       11.借书       12.还书" << '\n';
+        cout << "13.查看用户   0.退出并保存" << '\n';
+        cout << "请选择：";
 
-    // // 实验2测试
+        if(!(cin >> choice)) // 输入非数字：清错误状态后重新选择
+        {
+            cin.clear();
+            eatLine();
+            cout << "输入无效，请输入数字选项！" << '\n';
+            continue;
+        }
+        eatLine();
 
-    // Library lib1;
-    // Library lib2("schoollibrary","SWUST","123-456");
-    // Book b1("C++ from learn to death","Publisher of China","Niko","9780306406157",99.99,325,true);
-    // Book b2("My lover","Publisher of American","Trump","9783161484100",88.88,799,true);
-    // lib2.addBook(b1);
-    // lib2.printAll();
-    // lib2.addBook(b2);
-    // lib2.printAll();
-    // lib2.findBook("978987654321");
-    // lib2.findISBN("C++ from learn to death");
-    // Student s1;
-    // Student s2("Mask","history",5120258989);
-    // Student s3("Trump","computer",5120256767);
-    // s2.borrow(b1,"2026.09.19","2026.09.26");
-    // s3.borrow(b2,"2026.09.20","2026.09.27");
-    // s2.returnbook(b1,"2026.09.26");
-    // s3.returnbook(b2,"2026.09.30");
-    
-    // 实验三四
-    Book b("C++ Primer", "China", "Stanley", "9787121155352", 100.0, 800, true);
+        if(choice == 0)
+        {
+            lib.saveData(); // 退出保存：覆盖写回 books.txt / users.txt
+            cout << "感谢使用，再见！" << '\n';
+            return 0;
+        }
 
-    // 用基类指针指向子类对象，=（向上赋值）将子类对象地址赋值给父类指针，调用是体现多态（调用子类实现的函数）
-    // 此处new可以用 ：
-    // auto u1 = make_unique<Studnet>(………………); 智能指针避免手动delete
-    // unique_ptr<User> u1(new Student(…………)); c++ 11 写法 (注意只能用括号初始化，不能=赋值)
-    User* u1 = new Student("张三","计算机科学与技术",5120256666);
-    User* u2 = new Teacher("李四","软件工程",5120258888);
-
-    cout << u1 -> getUserType() << "逾期比例为：" << u1 -> getDivisor() << endl;
-    cout << u2 -> getUserType() << "逾期比例为：" << u2 -> getDivisor() << endl;
-
-    // 测试还借功能
-    u1 -> borrow(b,"2026-10-01","2026-10-10");
-    u1 -> returnbook(b,"2026-10-15"); // 测试逾期五天
-
-    // 虚析构保持正确的释放
-    delete u1; // vptr(虚表指针) -> Student类的虚析构表 -> student的析构 -> ~User() -> 调用operator delete 将子类对象落内存归还操作系统
-    delete u2;
-    
-    return 0;
+        switch(choice)
+        {
+        case 1: // 添加图书
+        {
+            string name, publisher, author, isbn;
+            double price = 0.0;
+            int page = 0;
+            cout << "请输入书名：";          getline(cin, name);
+            cout << "请输入出版社：";        getline(cin, publisher);
+            cout << "请输入作者：";          getline(cin, author);
+            cout << "请输入ISBN（13位）：";  getline(cin, isbn);
+            cout << "请输入价格：";          cin >> price;
+            cout << "请输入页数：";          cin >> page;
+            eatLine();
+            lib.addBook(Book(name, publisher, author, isbn, price, page, true));
+            break;
+        }
+        case 2: // 删除图书
+        {
+            string isbn;
+            cout << "请输入要删除的图书 ISBN：";
+            getline(cin, isbn);
+            lib.removeBook(isbn);
+            break;
+        }
+        case 3: // 查询图书
+        {
+            string isbn;
+            cout << "请输入要查询的图书 ISBN：";
+            getline(cin, isbn);
+            Book* book = lib.findBook(isbn);
+            if(book != nullptr)
+            {
+                book->PrintBookInformation();
+            }
+            break;
+        }
+        case 4: // 列出全部图书
+            lib.printAll();
+            break;
+        case 5: // 添加用户
+        {
+            string type, name, department;
+            long long id = 0;
+            cout << "用户类型（S=学生 / T=教师）："; getline(cin, type);
+            cout << "请输入姓名：";  getline(cin, name);
+            cout << "请输入院系：";  getline(cin, department);
+            cout << "请输入ID：";    cin >> id;
+            eatLine();
+            if(type == "S" || type == "s")
+            {
+                lib.addUser(new Student(name, department, id));
+            }
+            else if(type == "T" || type == "t")
+            {
+                lib.addUser(new Teacher(name, department, id));
+            }
+            else
+            {
+                cout << "类型无效，添加失败！" << '\n';
+            }
+            break;
+        }
+        case 6: // 删除用户
+        {
+            long long id = 0;
+            cout << "请输入要删除的用户 ID：";
+            cin >> id;
+            eatLine();
+            lib.removeUser(id);
+            break;
+        }
+        case 7: // 修改图书
+        {
+            string isbn, name, author, publisher;
+            double price = 0.0;
+            int page = 0;
+            cout << "请输入要修改的图书 ISBN："; getline(cin, isbn);
+            cout << "新的书名：";    getline(cin, name);
+            cout << "新的作者：";    getline(cin, author);
+            cout << "新的出版社：";  getline(cin, publisher);
+            cout << "新的价格：";    cin >> price;
+            cout << "新的页数：";    cin >> page;
+            eatLine();
+            lib.updateBook(isbn, name, author, publisher, price, page);
+            break;
+        }
+        case 8: // 修改用户
+        {
+            long long id = 0;
+            string name, department;
+            cout << "请输入要修改的用户 ID：";
+            cin >> id;
+            eatLine();
+            cout << "新的姓名：";  getline(cin, name);
+            cout << "新的院系：";  getline(cin, department);
+            lib.updateUser(id, name, department);
+            break;
+        }
+        case 9: // 登录
+        {
+            long long id = 0;
+            cout << "请输入登录 ID：";
+            cin >> id;
+            eatLine();
+            lib.login(id);
+            break;
+        }
+        case 10: // 登出
+        {
+            long long id = 0;
+            cout << "请输入登出 ID：";
+            cin >> id;
+            eatLine();
+            lib.logout(id);
+            break;
+        }
+        case 11: // 借书（当前登录用户）
+        case 12: // 还书（当前登录用户）
+        {
+            User* user = lib.getCurrentUser();
+            if(user == nullptr)
+            {
+                cout << "请先登录（选项9），借还操作针对当前登录用户！" << '\n';
+                break;
+            }
+            string bookname, date1, date2;
+            cout << "请输入书名：";
+            getline(cin, bookname);
+            if(choice == 11)
+            {
+                cout << "请输入借阅日期（YYYY-MM-DD）："; getline(cin, date1);
+                cout << "请输入应还日期（YYYY-MM-DD）："; getline(cin, date2);
+                lib.borrowBook(bookname, *user, date1, date2);
+            }
+            else
+            {
+                cout << "请输入还书日期（YYYY-MM-DD）："; getline(cin, date1);
+                lib.returnbook(bookname, *user, date1);
+            }
+            break;
+        }
+        case 13: // 查看用户信息
+        {
+            long long id = 0;
+            cout << "请输入要查看的用户 ID：";
+            cin >> id;
+            eatLine();
+            User* user = lib.findUser(id);
+            if(user != nullptr)
+            {
+                lib.printUserinformation(*user);
+            }
+            break;
+        }
+        default:
+            cout << "无效选项，请重新选择！" << '\n';
+            break;
+        }
+    }
 }

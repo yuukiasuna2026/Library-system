@@ -1,78 +1,52 @@
 #include<iostream>
+#include<fstream>
+#include<sstream>
+#include<vector>
 #include"book.h"
+
+namespace
+{
+	std::vector<std::string> splitLine(const std::string& line) // 按 '|' 切分字段
+	{
+		std::vector<std::string> fields;
+		std::string field;
+		std::istringstream ss(line);
+		while(std::getline(ss, field, '|'))
+		{
+			fields.push_back(field);
+		}
+		if(!line.empty() && line.back() == '|') // getline 会丢弃末尾的空字段
+		{
+			fields.push_back("");
+		}
+		return fields;
+	}
+}
 
 // 构造函数
 Book::Book()
-{
-	name = "";
-	publisher = "";
-	author = "";
-	isbn = "";
-	price = 0.00;
-	page = 0;
-	available = true;
-}
+	: name(""), Username(""), publisher(""), author(""), isbn(""),
+	  price(0.0), page(0), available(true), ID(0),
+	  initialdate(""), returndate("")
+{}
 Book::Book(std::string name, std::string publisher, std::string author, std::string isbn, double price, int page,bool available)
+	: name(""), Username(""), publisher(""), author(""), isbn(""),
+	  price(0.0), page(0), available(true), ID(0),
+	  initialdate(""), returndate("")
 {
-	
-	bool check = checkISBN(isbn);
-	if (check)
-	{
-		this->name =std::move(name);
-		this->publisher = std::move(publisher);
-		this->author = std::move(author);
-		this->isbn = std::move(isbn);
-		this->price = price;
-		this->page = page;
-		this->available = available;
-	}
-	else
+	if (!checkISBN(isbn))
 	{
 		std::cout << "Sorry,ISBN is wrong!" << std::endl;
-	}
-}
-
-// 设置类函数
-void Book::setName(const std::string name)
-{
-	this->name = name;
-}
-void Book::setUsername(const std::string Username)
-{
-	this->name = std::move(Username);
-}
-void Book::setUserID(const long long IDnum)
-{
-	this->ID = IDnum;
-}
-void Book::setPublisher(const std::string publisher)
-{
-	this->publisher = publisher;
-}
-void Book::setAuthor(const std::string author)
-{
-	this ->author = std::move(author);
-}
-void Book::setISBN(const std::string ISBN )
-{
-	bool check = checkISBN(ISBN);
-	if(check)
-	{
-		this -> isbn  = ISBN;
-	}
-	else
-	{
-		std::cout << "Sorry,ISBN is wrong!" << std::endl;
+		return;
 	}
 
-}
-void Book::setPrice(const double Price)
-{
-	this -> price = Price;
-}
-void Book::setPage(const int Page)
-{
-	this -> page = Page ;
+	this->name = std::move(name);
+	this->publisher = std::move(publisher);
+	this->author = std::move(author);
+	this->isbn = std::move(isbn);
+	this->price = price;
+	this->page = page;
+	this->available = available;
 }
 
 // 获取类函数
@@ -82,7 +56,7 @@ std::string Book::getName() const
 }
 std::string Book::getUsername() const
 {
-	return name;
+	return Username;
 }
 long long Book::getUserID() const
 {
@@ -163,11 +137,11 @@ void Book::GetOut(std::string Username_ ,long long IDnum,std::string initialdate
 	}
 	else
 	{
-		std::cout << "This book has been borrowed!" << std::endl;
-		std::cout << "The borrower is" << Username << std::endl;
-		std::cout << "The ID is" << ID << std::endl;
-		std::cout << "The initial date is" << initialdate << std::endl;
-		std::cout << "The return date is" << returndate << std::endl;
+		std::cout << "这本书已经被借出了！" << std::endl;
+		std::cout << "借阅者是" << Username << std::endl;
+		std::cout << "ID是" << ID << std::endl;
+		std::cout << "借阅日期是" << initialdate << std::endl;
+		std::cout << "归还日期是" << returndate << std::endl;
 	}
 
 }
@@ -178,36 +152,101 @@ void Book::GetIn(std::string Username_, long long IDnum)
 		if(Username_ == Username && ID == IDnum)
 		{
 			available = true;
-			name = "";
+			Username = "";
 			ID = 0;
 			initialdate = "";
 			returndate = "";
 		}
 		else if(Username_ != Username && ID == IDnum)
 		{
-			std::cout << "The student number is correct,but the name is wrong!" << std::endl;
+			std::cout << "你的ID是正确的，但名字不对!" << std::endl;
 		}
 		else if(Username_ == Username && ID != IDnum)
 		{
-			std::cout << "The name is correct,but the student number is wrong!" << std::endl;
+			std::cout << "你的名字是对的，但ID不对!" << std::endl;
 		}
 		else
 		{
-			std::cout << "The name and student number are both wrong!" << std::endl;
+			std::cout << "你的名字和ID都不对!" << std::endl;
 		}
 	}
 	else
 	{
-		std::cout << "This book has not been borrowed!" << std::endl;
+		std::cout << "这本书还没有被借出！" << std::endl;
 	}
 }
 void Book::PrintBookInformation() const
 {
-	std::cout << "Book name is :" << name << std::endl;
-	std::cout << "Book publisher is :" << publisher << std::endl;
-	std::cout << "Book author is :" << author << std::endl;
-	std::cout << "Book ISBN is :" << isbn <<std::endl;
-	std::cout << "Book price is :" << price << std::endl;
-	std::cout << "Book page is :" << page << std::endl;
-	std::cout << "Book available is :" << (available ? "Yes" : "No!It has benn borrowed") << std::endl;
+	std::cout << *this; // 复用 operator<<，保持原有功能
+}
+// 实验六：Book 自己负责自己的存取格式
+void Book::saveTo(std::ostream& os) const
+{
+	os << isbn << '|' << name << '|' << author << '|' << publisher << '|'
+	   << price << '|' << page << '|' << (available ? 1 : 0) << '|' << ID << '|'
+	   << initialdate << '|' << returndate << '\n';
+}
+bool Book::loadFrom(const std::string& line, Book& out, long long& borrowerID,
+					std::string& initDate, std::string& retDate)
+{
+	std::vector<std::string> f = splitLine(line);
+	// ISBN|书名|作者|出版社|价格|页数|在馆|借阅人ID|借阅日期|应还日期
+	if(f.size() != 10)
+	{
+		return false;
+	}
+	double price = 0.0;
+	int page = 0;
+	int avail = 0;
+	borrowerID = 0;
+	initDate = "";
+	retDate = "";
+	try
+	{
+		price = std::stod(f[4]);
+		page = std::stoi(f[5]);
+		avail = std::stoi(f[6]);
+		if(avail == 0)
+		{
+			borrowerID = std::stoll(f[7]);
+			initDate = f[8];
+			retDate = f[9];
+		}
+	}
+	catch(...)
+	{
+		return false;
+	}
+	if(!checkISBN(f[0]) || price < 0 || page < 0 || (avail != 0 && avail != 1))
+	{
+		return false;
+	}
+	out = Book(f[1], f[3], f[2], f[0], price, page, true); // 构造顺序：name,publisher,author,isbn,...
+	return true;
+}
+bool Book::updateInfo(const std::string name, const std::string author,
+					  const std::string publisher, double price, int page)
+{
+	if(price < 0 || page < 0)
+	{
+		std::cout << "修改失败：价格与页数不能为负数！" << std::endl;
+		return false;
+	}
+	this->name = name;
+	this->author = author;
+	this->publisher = publisher;
+	this->price = price;
+	this->page = page;
+	return true;
+}
+std::ostream& operator<<(std::ostream& os, const Book& book)
+{
+	os << "书名 :" << book.getName() << std::endl;
+	os << "出版社 :" << book.getPublisher() << std::endl;
+	os << "作者 :" << book.getAuthor() << std::endl;
+	os << "ISBN :" << book.getISBN() << std::endl;
+	os << "价格 :" << book.getPrice() << std::endl;
+	os << "页数 :" << book.getPage() << std::endl;
+	os << "是否可借 :" << (book.isAvailable() ? "Yes" : "No!") << std::endl;
+	return os;
 }
