@@ -30,6 +30,7 @@ int main()
         libA.addBook(Book("Algo", "PubA", "AuthA", "9780306406157", 50.0, 300, true));
         User* u = libA.findUser(1001);
         libA.borrowBook("Cpp", *u, "2026-10-01", "2026-10-10"); // 1001 借走 Cpp
+        ok &= (u->getBorrowedBooks().size() == 1 && u->getBorrowedBooks()[0] == "Cpp"); // 借书同步书名列表
         ok &= libA.saveData(DIR);
 
         Library libB;
@@ -39,6 +40,8 @@ int main()
         ok &= (us != nullptr && us->getUserType() == "学生"); // 派生类恢复，多态不丢
         ok &= (ut != nullptr && ut->getUserType() == "教师");
         ok &= (us != nullptr && us->getCurrent() == 1);       // 已借数量恢复
+        ok &= (us != nullptr && us->getBorrowedBooks().size() == 1
+               && us->getBorrowedBooks()[0] == "Cpp");        // 借阅书名列表恢复
         Book* bb = libB.findBook("9787121155352");
         ok &= (bb != nullptr && !bb->isAvailable() && bb->getUserID() == 1001
                && bb->getReturndate() == "2026-10-10");       // 借出状态与借阅人对应
@@ -50,10 +53,11 @@ int main()
     // 3. 坏行容错：格式非法、类型非法、重复 ID、借阅人不存在的书
     {
         ofstream uf(string(DIR) + "/users.txt");
-        uf << "S|1001|张三|计算机|1" << '\n';   // 正常
+        uf << "S|1001|张三|计算机|1" << '\n';   // 正常（旧 5 字段格式兼容）
         uf << "S|1001|重复ID|x|0" << '\n';    // 重复 ID，跳过
         uf << "X|1003|坏类型|x|0" << '\n';    // 类型非法，跳过
         uf << "这不是合法行" << '\n';          // 字段数不对，跳过
+        uf << "T|1002|王五|数学|2|不存在的书,另一本" << '\n'; // 书名与图书对不上，加载后修正
         uf.close();
 
         ofstream bf(string(DIR) + "/books.txt");
@@ -63,9 +67,11 @@ int main()
         bf.close();
 
         Library libC;
-        ok &= libC.loadData(DIR); // 应看到 3 条警告/跳过，不崩溃
+        ok &= libC.loadData(DIR); // 应看到多条警告/跳过，不崩溃
         ok &= (libC.findUser(1001) != nullptr);
-        ok &= (libC.findUser(1002) == nullptr);       // 1002 不在本文件中
+        User* wu = libC.findUser(1002);
+        ok &= (wu != nullptr && wu->getCurrent() == 0 && wu->getBorrowedBooks().empty()); // 书名列表被修正
+        ok &= (libC.findUser(1003) == nullptr);
         ok &= (libC.findBook("9787121155352") == nullptr); // 坏书被跳过
         ok &= (libC.findBook("9780306406157") != nullptr);
         cout << "--- 场景3结束 ---" << '\n';

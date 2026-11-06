@@ -16,7 +16,6 @@ private:
     std::string libname;
     std::string address;
     std::string phone;
-    User* currentUser; // 当前登录用户，nullptr 表示未登录
 
 public:
     Library();
@@ -31,11 +30,7 @@ public:
     // 返回的指针仅在 books 不发生扩容/删除期间有效
     Book* findBook(const std::string& ISBN);
     void printAll() const;
-    // // 借还
-    // void borrowBook(std::string bookname, std::string stuname, long long stunumber,
-    //                 std::string initialdate, std::string returndate);
-    // void returnBook(std::string bookname, std::string stuname, long long stunumber,
-    //                 std::string returndate);
+    // 借还
     void borrowBook(string bookname , User& user , string initialdate , string returndate);
     void returnbook(string bookname , User& user , string returndate);
 
@@ -48,11 +43,9 @@ public:
     bool updateUser(long long id, const std::string& name, const std::string& department);
     bool updateBook(const std::string& isbn, const std::string& name, const std::string& author,
                     const std::string& publisher, double price, int page); // 不影响借出状态
-    User* getCurrentUser() const; // 当前登录用户，nullptr 表示未登录
     void printUserinformation(User& user) const;
-    bool login(long long userID);
-    bool logout(long long userID);
-    // 显式清空：释放全部用户、清空图书与登录状态，调用后 findUser/findBook 返回的旧指针全部失效
+    void printBorrowList(const User& user) const; // 查询用户借阅书籍及每本的还书日期、是否逾期
+    // 显式清空：释放全部用户、清空图书，调用后 findUser/findBook 返回的旧指针全部失效
     void clear();
     // 启动加载：从 path 目录下的 users.txt、books.txt 恢复数据；文件缺失或为空时从空数据开始
     bool loadData(const std::string& path = ".");

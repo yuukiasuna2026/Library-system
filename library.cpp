@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <algorithm> // sort：一致性校验时无序比较书名列表
 #include "library.h"
 #include "Student.h"
 #include "Teacher.h"
@@ -11,7 +12,6 @@ Library::Library()
     this -> libname = "";
     this -> address = "";
     this -> phone = "";
-    this -> currentUser = nullptr;
 }
 Library::Library(std::string libraryname , std::string libraryaddress , std::string libraryphone)
 {
@@ -20,7 +20,6 @@ Library::Library(std::string libraryname , std::string libraryaddress , std::str
     this -> libname = std::move(libraryname);
     this -> address = std::move(libraryaddress);
     this -> phone = std::move(libraryphone);
-    this -> currentUser = nullptr;
 }
 Library::~Library()
 {
@@ -205,10 +204,6 @@ bool Library::removeUser(long long id)
                 cout << "删除失败：该用户还有 " << (*it)->getCurrent() << " 本书未归还！" << '\n';
                 return false;
             }
-            if(currentUser == *it)
-            {
-                currentUser = nullptr; // 登录态同步清理
-            }
             delete *it; // Library 统一释放
             users.erase(it); // erase 后 it 失效，立即返回不再使用
             cout << "用户已删除！" << '\n';
@@ -251,65 +246,57 @@ bool Library::updateBook(const std::string& isbn, const std::string& name, const
     cout << "未找到该图书，修改失败！" << '\n';
     return false;
 }
-User* Library::getCurrentUser() const
-{
-    return currentUser;
-}
 void Library::printUserinformation(User& user) const
 {
     user.getUserInformation();
 
     cout << "已借阅的书籍：" << '\n';
-    bool found = false;
-
-    for (const auto& book : books)
-    {
-        if (!book.isAvailable() && book.getUserID() == user.getID())
-        {
-            found = true;
-            cout << "《" << book.getName() << "》" << '\n';
-        }
-    }
-
-    if (!found)
+    const vector<string>& titles = user.getBorrowedBooks(); // User 自己维护的借阅列表
+    if(titles.empty())
     {
         cout << "暂无借阅记录" << '\n';
+        return;
+    }
+    for(const auto& title : titles)
+    {
+        cout << "《" << title << "》" << '\n';
     }
 }
-bool Library::login(long long userID)
+// 查询用户借阅书籍及还书日期：以图书记录为准（Book 是日期与状态的唯一权威来源）
+void Library::printBorrowList(const User& user) const
 {
-    // 静默查找，避免与 findUser 的失败提示重复输出
-    User* user = nullptr;
-    for(const auto existingUser : users) // 按值拷贝指针，遍历只读
+    bool found = false;
+    string todayStr;
+    bool hasToday = User::today(todayStr);
+    int todayDays = 0;
+    if(hasToday)
     {
-        if(existingUser->getID() == userID)
+        User::dateToDays(todayStr, todayDays); // static，可取
+    }
+
+    for(const auto& book : books)
+    {
+        if(book.isAvailable() || book.getUserID() != user.getID())
         {
-            user = existingUser;
-            break;
+            continue;
         }
+        found = true;
+        cout << "《" << book.getName() << "》" << '\n';
+        cout << "    应还日期：" << book.getReturndate();
+        if(hasToday)
+        {
+            int dueDays = 0;
+            if(User::dateToDays(book.getReturndate(), dueDays))
+            {
+                cout << (dueDays < todayDays ? "（已逾期！）" : "（未到期）");
+            }
+        }
+        cout << '\n';
     }
-    if(user != nullptr)
+    if(!found)
     {
-        currentUser = user; // 记录真实登录状态
-        cout << "您已成功登录！" << endl;
-        return true;
+        cout << "该用户当前没有借阅中的图书！" << '\n';
     }
-    else
-    {
-        cout << "未能找到对应用户！请检查您的ID输入是否正确!" << endl;
-        return false;
-    }
-}
-bool Library::logout(long long userID)
-{
-    if(currentUser != nullptr && currentUser->getID() == userID)
-    {
-        currentUser = nullptr; // 清除登录状态
-        cout << "您已成功登出！" << endl;
-        return true;
-    }
-    cout << "未能成功登出!请检查您输入的ID" << endl;
-    return false;
 }
 void Library::clear()
 {
@@ -319,7 +306,6 @@ void Library::clear()
     }
     users.clear();
     books.clear();
-    currentUser = nullptr;
     cout << "图书馆已清空：全部用户与图书记录已移除！" << '\n';
 }
 
@@ -357,7 +343,7 @@ bool Library::loadData(const std::string& path)
             {
                 continue;
             }
-            User* user = User::loadFrom(line); // 格式解析下沉到 User，类型标记恢复派生类
+            User* user = User::loadFrom(line); 
             if(user == nullptr)
             {
                 userBadLines++;
@@ -447,17 +433,28 @@ bool Library::loadData(const std::string& path)
         bookFile.close();
     }
 
-    // 一致性校验：以图书记录为单一事实源，修正用户已借数量
+    // 一致性校验：以图书记录为单一事实源，修正用户已借数量与借阅书名列表
     for(auto* user : users)
     {
-        int actual = 0;
+        vector<string> actualTitles;
         for(const auto& book : books)
         {
             if(!book.isAvailable() && book.getUserID() == user->getID())
             {
-                actual++;
+                actualTitles.push_back(book.getName());
             }
         }
+        // 文件中的书名列表与图书不一致（顺序无关比较）时警告并按图书修正
+        vector<string> fileTitles = user->borrowedBooks;
+        sort(fileTitles.begin(), fileTitles.end());
+        vector<string> sortedActual = actualTitles;
+        sort(sortedActual.begin(), sortedActual.end());
+        if(fileTitles != sortedActual)
+        {
+            cout << "警告：用户 " << user->getID() << " 的借阅书名列表与图书记录不符，已按图书修正！" << '\n';
+            user->borrowedBooks = actualTitles; // friend 访问
+        }
+        int actual = (int)actualTitles.size();
         if(user->current != actual)
         {
             cout << "警告：用户 " << user->getID() << " 记录的已借数量 " << user->current << " 与实际 " << actual << " 不符，已按实际修正！" << '\n';
@@ -490,7 +487,7 @@ bool Library::saveData(const std::string& path)
     }
     for(const auto& book : books)
     {
-        book.saveTo(bookFile); // 序列化由 Book 自己负责
+        book.saveTo(bookFile); // 由 Book 自己负责
     }
     bookFile.close();
 
@@ -502,7 +499,7 @@ bool Library::saveData(const std::string& path)
     }
     for(const auto* user : users)
     {
-        user->saveTo(userFile); // 序列化由 User 自己负责，多态输出类型标记
+        user->saveTo(userFile); //  User 自己负责
     }
     userFile.close();
 

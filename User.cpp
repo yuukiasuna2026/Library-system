@@ -3,6 +3,9 @@
 #include<iomanip> // 用于设置输出的精度
 #include<sstream>
 #include<vector>
+#include<ctime>   // time/localtime：取系统当前日期
+#include<cstdio>  // snprintf：格式化日期字符串
+#include<algorithm> // find：还书时从借阅列表移除书名
 #include "User.h"
 #include "Student.h"
 #include "Teacher.h"
@@ -65,6 +68,10 @@ int User::getMax() const
 int User::getCurrent() const
 {
     return current;
+}
+const vector<string>& User::getBorrowedBooks() const
+{
+    return borrowedBooks;
 }
 // 纯虚函数 ：
 // vitual int getDivisor() const = 0;
@@ -145,6 +152,7 @@ void User::borrow(Book& book , string initialdate , string returndate)
 
     book.GetOut(getName() , getID() , initialdate , returndate);
     current++;
+    borrowedBooks.push_back(book.getName()); // 同步维护借阅书名列表
 }
 
 // 利用daysfromcivil算法改进日期问题
@@ -156,6 +164,57 @@ int User::daysFromCivil(int y,int m,int d)
     unsigned doy = (153 * (m + (m > 2 ? -3 : 9)) + 2) / 5 + d - 1; // 当前处于该年的第几天 day of year
     unsigned doe = yoe * 365 + yoe / 4 - yoe / 100 + doy; // 该纪元第几天 day of era
     return era * 146097 + (int)doe - 719468;
+}
+
+// civilFromDays：daysFromCivil 的逆运算（Hinnant 算法），仅供 addDays 内部调用
+static void civilFromDays(int z, int& y, int& m, int& d)
+{
+    z += 719468;
+    int era = (z >= 0 ? z : z - 146096) / 146097;
+    unsigned doe = (unsigned)(z - era * 146097); // 该纪元第几天
+    unsigned yoe = (doe - doe / 1460 + doe / 36524 - doe / 146096) / 365; // 纪元年第几年
+    int yy = (int)yoe + era * 400;
+    unsigned doy = doe - (365 * yoe + yoe / 4 - yoe / 100); // 该年第几天
+    unsigned mp = (5 * doy + 2) / 153; // 该年第几个月（3 月起算）
+    d = (int)(doy - (153 * mp + 2) / 5 + 1);
+    m = (int)(mp + (mp < 10 ? 3 : -9)); // 换算回 1 月起算
+    y = yy + (m <= 2);
+}
+
+// 获取当前日期（本地时区），格式 YYYY-MM-DD
+bool User::today(std::string& out)
+{
+    time_t t = time(nullptr);
+    tm* local = localtime(&t);
+    if(local == nullptr)
+    {
+        return false;
+    }
+    char buf[11];
+    snprintf(buf, sizeof(buf), "%04d-%02d-%02d",
+             local->tm_year + 1900, local->tm_mon + 1, local->tm_mday);
+    out = buf;
+    return true;
+}
+
+// 日期加 n 天，结果写入 out（YYYY-MM-DD）；base 非法或 n 为负时返回 false
+bool User::addDays(const std::string& base, int n, std::string& out)
+{
+    if(n < 0)
+    {
+        return false;
+    }
+    int days = 0;
+    if(!dateToDays(base, days))
+    {
+        return false;
+    }
+    int y = 0, m = 0, d = 0;
+    civilFromDays(days + n, y, m, d);
+    char buf[11];
+    snprintf(buf, sizeof(buf), "%04d-%02d-%02d", y, m, d);
+    out = buf;
+    return true;
 }
 void User::returnbook(Book& book , string returndate)
 {
@@ -199,6 +258,12 @@ void User::returnbook(Book& book , string returndate)
     // 所有成功的还书分支统一更新一次
     book.GetIn(getName(),getID());
     current--;
+    // 从借阅列表移除该书（重复书名只移除一本）
+    auto it = find(borrowedBooks.begin(), borrowedBooks.end(), book.getName());
+    if(it != borrowedBooks.end())
+    {
+        borrowedBooks.erase(it);
+    }
 }
 void User::getUserInformation() const
 {
@@ -221,13 +286,24 @@ std::ostream& operator<<(std::ostream& os, const User& user)
 void User::saveTo(std::ostream& os) const
 {
     os << (getUserType() == "学生" ? "S" : "T") << '|' << ID << '|'
-       << name << '|' << department << '|' << current << '\n';
+       << name << '|' << department << '|' << current;
+    // 第 6 字段：借阅书名列表（逗号分隔），没有借书则为空
+    os << '|';
+    for(size_t i = 0; i < borrowedBooks.size(); i++)
+    {
+        if(i > 0)
+        {
+            os << ',';
+        }
+        os << borrowedBooks[i];
+    }
+    os << '\n';
 }
-User* User::loadFrom(const string& line) // 工厂：按类型标记 new 对应派生类，以 User* 返回保证多态
+User* User::loadFrom(const string& line) // 按类型标记 new 对应派生类，以 User* 返回保证多态
 {
     vector<string> f = splitLine(line);
-    // 类型|ID|姓名|院系|当前已借数量
-    if(f.size() != 5 || (f[0] != "S" && f[0] != "T"))
+    // 类型|ID|姓名|院系|当前已借数量|借阅书名列表（逗号分隔，可省略/为空）
+    if((f.size() != 5 && f.size() != 6) || (f[0] != "S" && f[0] != "T"))
     {
         return nullptr;
     }
@@ -254,5 +330,18 @@ User* User::loadFrom(const string& line) // 工厂：按类型标记 new 对应�
         current = user->getMax();
     }
     user->current = current; // 成员函数可访问 protected 成员
+    // 读取借阅书名列表（旧格式 5 字段没有该信息，保持空列表）
+    if(f.size() == 6 && !f[5].empty())
+    {
+        string title;
+        istringstream ss(f[5]);
+        while(getline(ss, title, ','))
+        {
+            if(!title.empty())
+            {
+                user->borrowedBooks.push_back(title);
+            }
+        }
+    }
     return user;
 }
