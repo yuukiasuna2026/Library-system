@@ -12,6 +12,7 @@ public:
     // 获取相关的数据
     double getDivisor() const override;
     string getUserType() const override;
+    int getRenewDays() const override; // 学生不支持续借：返回 0
 
     // 学生无特殊服务
     void borrow(Book& book , string initialdate , string returndate) override;

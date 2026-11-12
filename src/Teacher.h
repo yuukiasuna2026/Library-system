@@ -12,6 +12,7 @@ public:
     // 获取数据
     double getDivisor() const override;
     string getUserType() const override;
+    int getRenewDays() const override; // 教师可续借 7 天
     void borrow(Book& book , string initialdate , string returndate) override;
     void returnbook(Book& book , string returndate) override;
 };

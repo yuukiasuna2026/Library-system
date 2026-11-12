@@ -31,6 +31,7 @@ public:
 	double getPrice() const;
 	int getPage() const;
 	std::string getReturndate() const;
+	std::string getInitialdate() const;
     void PrintBookInformation() const;
 	static bool checkISBN(std::string ISBN);
 	// 实验六：Book 自己负责自己的存取格式
@@ -47,6 +48,7 @@ private:
 	friend class Teacher;
 	void GetOut(std::string Username_,long long UserID, std::string initialdate, std::string returndate);
 	void GetIn(std::string Username_, long long UserID);
+	void extendDueDate(const std::string& newDue); // 仅续借流程使用：原应还日期上延长
 	friend class Library; // 持久化恢复时写借阅状态
 };
 

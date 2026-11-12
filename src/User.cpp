@@ -216,6 +216,36 @@ bool User::addDays(const std::string& base, int n, std::string& out)
     out = buf;
     return true;
 }
+// 续借：仅本人借出的书可续；天数由纯虚函数 getRenewDays() 多态决定（学生 0 / 教师 7）
+bool User::renew(Book& book)
+{
+    if(book.isAvailable()
+        || book.getUsername() != getName()
+        || book.getUserID() != getID())
+    {
+        cout << "续借失败：该书不是您当前借阅的图书！" << endl;
+        return false;
+    }
+
+    int days = getRenewDays(); // 多态差异：学生 0，教师 7
+    if(days <= 0)
+    {
+        cout << "很抱歉，" << getUserType() << "身份不支持续借！" << endl;
+        return false;
+    }
+
+    string newDue;
+    if(!addDays(book.getReturndate(), days, newDue)) // 在原应还日期基础上延长
+    {
+        cout << "续借失败：该书记录的应还日期异常！" << endl;
+        return false;
+    }
+
+    // 延长应还日期（续借专用接口，其他借出信息不变）
+    book.extendDueDate(newDue);
+    cout << "续借成功！新的应还日期：" << newDue << endl;
+    return true;
+}
 void User::returnbook(Book& book , string returndate)
 {
     // 未借出或不属于当前用户时，不解析日期、不修改计数

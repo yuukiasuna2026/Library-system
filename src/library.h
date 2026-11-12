@@ -33,6 +33,8 @@ public:
     // 借还
     void borrowBook(string bookname , User& user , string initialdate , string returndate);
     void returnbook(string bookname , User& user , string returndate);
+    bool renewBook(const std::string& bookname, User& user); // 续借：经多态区分学生/教师
+    void searchBooks(const std::string& keyword) const;      // 按书名/作者关键词查询
 
     std::string findISBN(const std::string& name);
 

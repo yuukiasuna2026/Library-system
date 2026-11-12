@@ -140,21 +140,21 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Admin.h" />
-    <ClInclude Include="book.h" />
-    <ClInclude Include="User.h" />
-    <ClInclude Include="Student.h" />
-    <ClInclude Include="Teacher.h" />
-    <ClInclude Include="library.h" />
+    <ClInclude Include="src\Admin.h" />
+    <ClInclude Include="src\book.h" />
+    <ClInclude Include="src\User.h" />
+    <ClInclude Include="src\Student.h" />
+    <ClInclude Include="src\Teacher.h" />
+    <ClInclude Include="src\library.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Admin.cpp" />
-    <ClCompile Include="book.cpp" />
-    <ClCompile Include="library.cpp" />
-    <ClCompile Include="Student.cpp" />
-    <ClCompile Include="Teacher.cpp" />
-    <ClCompile Include="User.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\Admin.cpp" />
+    <ClCompile Include="src\book.cpp" />
+    <ClCompile Include="src\library.cpp" />
+    <ClCompile Include="src\Student.cpp" />
+    <ClCompile Include="src\Teacher.cpp" />
+    <ClCompile Include="src\User.cpp" />
+    <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

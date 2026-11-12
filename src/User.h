@@ -28,8 +28,9 @@ public:
 
     // 公共接口
     virtual void borrow(Book& book , string initialdate , string returndate);
-    // 教师能够续借，学生不能，用作多态的区分
     virtual void returnbook(Book& book , string returndate);
+    bool renew(Book& book); // 续借：非虚，天数经纯虚函数 getRenewDays() 多态区分
+    virtual int getRenewDays() const = 0; // 可续借天数：学生 0（不支持），教师 7
     void getUserInformation() const;
 
     // 获取相关的数据

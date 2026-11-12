@@ -134,7 +134,7 @@ void Library::borrowBook(string bookname , User& user , string initialdate , str
     string ISBN = findISBN(bookname);
     if(ISBN.empty())
     {
-        cout << "图书不存在或书名不唯一，借书操作已取消！" << '\n';
+        cout << "图书不存在，借书操作已取消！" << '\n';
         return;
     }
 
@@ -151,7 +151,7 @@ void Library::returnbook(string bookname , User& user , string returndate)
     string ISBN = findISBN(bookname);
     if(ISBN.empty())
     {
-        cout << "图书不存在或书名不唯一，还书操作已取消！" << '\n';
+        cout << "图书不存在，还书操作已取消！" << '\n';
         return;
     }
 
@@ -162,6 +162,49 @@ void Library::returnbook(string bookname , User& user , string returndate)
         return;
     }
     user.returnbook(*book , returndate);
+}
+// 续借：书名精确匹配（同名不借歧义），转多态的 User::renew
+bool Library::renewBook(const std::string& bookname, User& user)
+{
+    string ISBN = findISBN(bookname);
+    if(ISBN.empty())
+    {
+        cout << "图书不存在，续借操作已取消！" << '\n';
+        return false;
+    }
+    Book* book = findBook(ISBN);
+    if(book == nullptr)
+    {
+        cout << "图书不存在！" << '\n';
+        return false;
+    }
+    return user.renew(*book);
+}
+// 按书名/作者关键词查询：子串命中即列出，输出书名、作者、ISBN、在馆状态
+void Library::searchBooks(const std::string& keyword) const
+{
+    if(keyword.empty())
+    {
+        cout << "查询关键词不能为空！" << '\n';
+        return;
+    }
+    int count = 0;
+    for(const auto& book : books)
+    {
+        if(book.getName().find(keyword) != string::npos
+            || book.getAuthor().find(keyword) != string::npos)
+        {
+            count++;
+            cout << count << ". " << book.getName()
+                 << " | 作者：" << book.getAuthor()
+                 << " | ISBN：" << book.getISBN()
+                 << " | " << (book.isAvailable() ? "在馆可借" : "已借出") << '\n';
+        }
+    }
+    if(count == 0)
+    {
+        cout << "未找到与 \"" << keyword << "\" 相关的图书！" << '\n';
+    }
 }
 
 // 用户接口
@@ -433,7 +476,7 @@ bool Library::loadData(const std::string& path)
         bookFile.close();
     }
 
-    // 一致性校验：以图书记录为单一事实源，修正用户已借数量与借阅书名列表
+    // 一致性校验：以图书记录（book.text）为单一事实源，修正用户已借数量与借阅书名列表 
     for(auto* user : users)
     {
         vector<string> actualTitles;
@@ -452,13 +495,13 @@ bool Library::loadData(const std::string& path)
         if(fileTitles != sortedActual)
         {
             cout << "警告：用户 " << user->getID() << " 的借阅书名列表与图书记录不符，已按图书修正！" << '\n';
-            user->borrowedBooks = actualTitles; // friend 访问
+            user->borrowedBooks = actualTitles; 
         }
         int actual = (int)actualTitles.size();
         if(user->current != actual)
         {
             cout << "警告：用户 " << user->getID() << " 记录的已借数量 " << user->current << " 与实际 " << actual << " 不符，已按实际修正！" << '\n';
-            user->current = actual; // friend 访问
+            user->current = actual; 
         }
     }
 

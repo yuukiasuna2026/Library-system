@@ -26,6 +26,10 @@ string Teacher::getUserType() const
 {
     return "教师";
 }
+int Teacher::getRenewDays() const
+{
+    return 7; // 教师可续借 7 天
+}
 
 // 老师续借
 void Teacher::borrow(Book& book , string initialdate,string returndate)

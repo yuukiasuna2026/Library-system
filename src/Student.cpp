@@ -25,6 +25,10 @@ string Student::getUserType() const
 {
     return "学生";
 }
+int Student::getRenewDays() const
+{
+    return 0; // 学生不支持续借
+}
 
 // 学生的借还
 void Student::borrow(Book& book , string initialdate , string returndate)

@@ -39,7 +39,7 @@ static int readChoice()
 // admins.txt：账号|密码，一行一个；格式非法的行跳过并计数
 static bool loadAdmins(vector<Admin>& admins)
 {
-    ifstream in("admins.txt");
+    ifstream in("data/admins.txt"); // 数据文件统一放在 data/ 目录
     if(!in)
     {
         return false; // 文件缺失
@@ -69,7 +69,7 @@ static bool loadAdmins(vector<Admin>& admins)
 
 static void saveAdmins(const vector<Admin>& admins)
 {
-    ofstream out("admins.txt");
+    ofstream out("data/admins.txt");
     if(!out)
     {
         cout << "警告：admins.txt 打开失败，管理员数据未保存！" << '\n';
@@ -84,7 +84,7 @@ static void saveAdmins(const vector<Admin>& admins)
 // 退出并保存全部数据
 static void saveAndExit(Library& lib, const vector<Admin>& admins)
 {
-    lib.saveData();     // 覆盖写回 books.txt / users.txt
+    lib.saveData("data"); // 覆盖写回 data/books.txt、data/users.txt
     saveAdmins(admins); // 覆盖写回 admins.txt
     cout << "感谢使用，再见！" << '\n';
     exit(0);
@@ -213,8 +213,8 @@ static void userMenu(Library& lib, vector<Admin>& admins)
     while(true)
     {
         cout << "\n========== 图书馆借阅管理系统（用户界面）==========" << '\n';
-        cout << " 1.借书        2.还书        3.按ISBN查询图书" << '\n';
-        cout << " 4.列出全部图书    5.查询用户借阅情况    6.查询借阅与还书日期" << '\n';
+        cout << " 1.借书    2.还书    3.查询图书（ISBN/书名/作者）    4.列出全部图书" << '\n';
+        cout << " 5.查询用户借阅    6.查询借阅与还书日期    7.续借" << '\n';
         cout << " 9.管理员登录    0.退出并保存" << '\n';
         cout << "请选择：";
 
@@ -292,15 +292,34 @@ static void userMenu(Library& lib, vector<Admin>& admins)
             lib.returnbook(bookname, *user, returnDate);
             break;
         }
-        case 3: // 查询图书
+        case 3: // 查询图书：13 位纯数字按 ISBN 精确查，否则按书名/作者关键词模糊查
         {
-            string isbn;
-            cout << "请输入要查询的图书 ISBN：";
-            getline(cin, isbn);
-            Book* book = lib.findBook(isbn);
-            if(book != nullptr)
+            string key;
+            cout << "请输入 ISBN、书名或作者关键词：";
+            getline(cin, key);
+            bool isIsbn = key.size() == 13;
+            if(isIsbn)
             {
-                book->PrintBookInformation();
+                for(char c : key)
+                {
+                    if(c < '0' || c > '9')
+                    {
+                        isIsbn = false;
+                        break;
+                    }
+                }
+            }
+            if(isIsbn)
+            {
+                Book* book = lib.findBook(key);
+                if(book != nullptr)
+                {
+                    book->PrintBookInformation();
+                }
+            }
+            else
+            {
+                lib.searchBooks(key);
             }
             break;
         }
@@ -331,6 +350,23 @@ static void userMenu(Library& lib, vector<Admin>& admins)
             {
                 lib.printBorrowList(*user);
             }
+            break;
+        }
+        case 7: // 续借（刷卡通型；学生将被拒绝，教师在原应还日期上延长 7 天）
+        {
+            long long id = 0;
+            cout << "请刷入用户 ID：";
+            cin >> id;
+            eatLine();
+            User* user = lib.findUser(id); // 即时验证身份
+            if(user == nullptr)
+            {
+                break;
+            }
+            string bookname;
+            cout << "请输入书名：";
+            getline(cin, bookname);
+            lib.renewBook(bookname, *user);
             break;
         }
         case 9: // 管理员登录：校验成功后切换到管理员界面
@@ -385,7 +421,7 @@ int main()
 
     // 实验六：启动加载——从 books.txt / users.txt 恢复数据（文件缺失则从空数据开始）
     Library lib;
-    lib.loadData();
+    lib.loadData("data"); // 从 data/ 目录恢复数据
 
     // 加载管理员账号：admins.txt 缺失、为空或全部非法时，创建默认管理员
     vector<Admin> admins;

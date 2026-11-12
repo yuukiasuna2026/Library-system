@@ -86,6 +86,10 @@ std::string Book::getReturndate() const
 {
 	return returndate;
 }
+std::string Book::getInitialdate() const
+{
+	return initialdate;
+}
 bool Book::isAvailable() const
 {
 	return available;
@@ -144,6 +148,11 @@ void Book::GetOut(std::string Username_ ,long long IDnum,std::string initialdate
 		std::cout << "归还日期是" << returndate << std::endl;
 	}
 
+}
+// 续借专用：仅延长应还日期，借阅人与借阅日期不变；仅 User::renew 经友元调用
+void Book::extendDueDate(const std::string& newDue)
+{
+	returndate = newDue;
 }
 void Book::GetIn(std::string Username_, long long IDnum)
 {

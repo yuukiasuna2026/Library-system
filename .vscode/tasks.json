@@ -9,12 +9,13 @@
                 "-fdiagnostics-color=always",
                 "-g",
                 "-std=c++17", // 🌟 加上这一行，拥抱现代 C++
-                "main.cpp",
-                "book.cpp",
-                "library.cpp",
-                "Student.cpp",
-                "Teacher.cpp",
-                "User.cpp",   // 🌟 补上漏掉的文件！(注意大小写要和实际文件名完全一致)
+                "src/main.cpp",
+                "src/book.cpp",
+                "src/library.cpp",
+                "src/Student.cpp",
+                "src/Teacher.cpp",
+                "src/User.cpp",   // 🌟 补上漏掉的文件！(注意大小写要和实际文件名完全一致)
+                "src/Admin.cpp",  // 🌟 管理员类实现文件
                 "-o",
                 "${workspaceFolder}\\main.exe"
             ],
@@ -28,7 +29,7 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "detail": "编译所有cpp文件"
+            "detail": "编译 src 下所有cpp文件"
         }
     ]
 }
