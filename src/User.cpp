@@ -80,11 +80,12 @@ const vector<string>& User::getBorrowedBooks() const
 
 bool User::dateToDays(const string& date, int& days)
 {
+    // 校验日期格式 YYYY-MM-DD
     if(date.size() != 10 || date[4] != '-' || date[7] != '-')
     {
         return false;
     }
-
+    // 校验每个字符是否为数字（除了分隔符）
     for(int i = 0; i < 10; i++)
     {
         if(i == 4 || i == 7)
@@ -105,7 +106,8 @@ bool User::dateToDays(const string& date, int& days)
         return false;
     }
 
-    static const int daysInMonth[] = {0,31,28,31,30,31,30,31,31,30,31,30,31};
+    static const int daysInMonth[] = {0,31,28,31,30,31,30,31,31,30,31,30,31}; 
+
     int maxDay = daysInMonth[month];
     bool leap = (year % 400 == 0) || (year % 4 == 0 && year % 100 != 0);
     if(month == 2 && leap)
@@ -216,7 +218,7 @@ bool User::addDays(const std::string& base, int n, std::string& out)
     out = buf;
     return true;
 }
-// 续借：仅本人借出的书可续；天数由纯虚函数 getRenewDays() 多态决定（学生 0 / 教师 7）
+// 续借：仅本人借出的书可续；上限由纯虚函数 getRenewDays() 多态决定（学生 0 / 教师 7），天数由用户输入
 bool User::renew(Book& book)
 {
     if(book.isAvailable()
@@ -227,10 +229,26 @@ bool User::renew(Book& book)
         return false;
     }
 
-    int days = getRenewDays(); // 多态差异：学生 0，教师 7
-    if(days <= 0)
+    int limit = getRenewDays(); // 多态差异：学生 0，教师 7
+    if(limit <= 0)
     {
         cout << "很抱歉，" << getUserType() << "身份不支持续借！" << endl;
+        return false;
+    }
+
+    cout << "请输入续借天数（1～" << limit << "）：";
+    int days = 0;
+    if(!(cin >> days)) // 非数字输入
+    {
+        cin.clear();
+        cin.ignore(1024, '\n');
+        cout << "输入无效，续借已取消！" << endl;
+        return false;
+    }
+    cin.ignore(1024, '\n'); // 清除行尾残留
+    if(days < 1 || days > limit)
+    {
+        cout << "续借天数超出范围（1～" << limit << "），续借已取消！" << endl;
         return false;
     }
 
@@ -333,12 +351,15 @@ User* User::loadFrom(const string& line) // 按类型标记 new 对应派生类�
 {
     vector<string> f = splitLine(line);
     // 类型|ID|姓名|院系|当前已借数量|借阅书名列表（逗号分隔，可省略/为空）
+    // 排除不合法的行：字段数不对或类型标记错误
     if((f.size() != 5 && f.size() != 6) || (f[0] != "S" && f[0] != "T"))
     {
         return nullptr;
     }
+
     long long id = 0;
     int current = 0;
+    // 校验 ID 和当前已借数量，若非法则返回 nullptr
     try
     {
         id = std::stoll(f[1]);
@@ -348,8 +369,10 @@ User* User::loadFrom(const string& line) // 按类型标记 new 对应派生类�
     {
         return nullptr;
     }
+
     User* user = (f[0] == "S") ? static_cast<User*>(new Student(f[2], f[3], id))
                                : static_cast<User*>(new Teacher(f[2], f[3], id));
+
     if(current < 0)
     {
         current = 0;
@@ -369,7 +392,7 @@ User* User::loadFrom(const string& line) // 按类型标记 new 对应派生类�
         {
             if(!title.empty())
             {
-                user->borrowedBooks.push_back(title);
+                user->borrowedBooks.push_back(title); // 同步维护借阅书名列表
             }
         }
     }

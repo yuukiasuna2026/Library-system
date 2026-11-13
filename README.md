@@ -5,7 +5,7 @@
 ```
 libarary/
 ├── src/        全部源码（.h 与 .cpp）
-├── tests/      p1_test.cpp（实验五边界测试）、p2_test.cpp（实验六持久化测试）
+├── tests/      p1_test.cpp、p2_test.cpp
 ├── data/       books.txt / users.txt / admins.txt 数据文件
 └── libarary.slnx / libarary.vcxproj    
 ```
@@ -18,7 +18,7 @@ User  （抽象基类）       用户公共接口：ID/姓名/院系/已借数�
  └── Teacher            教师：最大借阅 10 本，可续借 7 天
 Library                 组合类：vector<Book> books + vector<User*> users
 Admin                   管理员登录凭证类：账号/密码校验，多管理员由 vector<Admin> 管理
- └── main.cpp           双菜单界面：用户界面（借还查询）/ 管理员界面（后台管理）
+main.cpp                程序入口：双菜单界面，用户界面（借还查询）/ 管理员界面（后台管理）
 
 - 组合关系：Library 拥有图书列表和用户列表。
 - 依赖关系：借书 / 还书 / 打印信息等函数以 `User&` / `Book&` 为参数。

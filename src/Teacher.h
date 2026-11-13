@@ -12,7 +12,8 @@ public:
     // 获取数据
     double getDivisor() const override;
     string getUserType() const override;
-    int getRenewDays() const override; // 教师可续借 7 天
+    int getRenewDays() const override; // 续借上限为 7 天：教师在此范围内输入续借天数
+    // 借还重写
     void borrow(Book& book , string initialdate , string returndate) override;
     void returnbook(Book& book , string returndate) override;
 };

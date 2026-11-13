@@ -66,7 +66,7 @@ bool Library::removeBook(const std::string& isbn)
                 cout << "删除失败：该图书正在借出中！" << '\n';
                 return false;
             }
-            books.erase(it); // 删除后 it 失效，立即返回不再使用
+            books.erase(it); 
             cout << "图书已删除！" << '\n';
             return true;
         }

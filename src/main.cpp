@@ -352,7 +352,7 @@ static void userMenu(Library& lib, vector<Admin>& admins)
             }
             break;
         }
-        case 7: // 续借（刷卡通型；学生将被拒绝，教师在原应还日期上延长 7 天）
+        case 7: // 续借（刷卡通型；学生将被拒绝，教师输入 1～7 天在原应还日期上延长）
         {
             long long id = 0;
             cout << "请刷入用户 ID：";
