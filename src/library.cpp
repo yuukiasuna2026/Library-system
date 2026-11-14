@@ -431,7 +431,7 @@ bool Library::loadData(const std::string& path)
             long long borrowerID = 0;
             std::string initDate;
             std::string retDate;
-            if(!Book::loadFrom(line, book, borrowerID, initDate, retDate)) // 格式解析下沉到 Book
+            if(!Book::loadFrom(line, book, borrowerID, initDate, retDate)) // 格式解析
             {
                 bookBadLines++;
                 continue;

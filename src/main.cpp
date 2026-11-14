@@ -27,6 +27,11 @@ static int readChoice()
     int choice = -1;
     if(!(cin >> choice)) // 输入非数字：清错误状态后重新选择
     {
+        if(cin.eof()) // 输入流结束（如重定向输入耗尽）：直接退出，避免菜单无限循环
+        {
+            cout << '\n';
+            exit(0);
+        }
         cin.clear(); // 用clear重置错误状态
         eatLine(); // 吃掉残留的错误输入和换行符
         cout << "输入无效，请输入数字选项！" << '\n';

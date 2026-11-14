@@ -25,14 +25,12 @@ namespace
 
 // 构造函数
 Book::Book()
-	: name(""), Username(""), publisher(""), author(""), isbn(""),
-	  price(0.0), page(0), available(true), ID(0),
-	  initialdate(""), returndate("")
+	: name(""), publisher(""), author(""), isbn(""), price(0.0), page(0),
+	  available(true), Username(""), ID(0), initialdate(""), returndate("")
 {}
 Book::Book(std::string name, std::string publisher, std::string author, std::string isbn, double price, int page,bool available)
-	: name(""), Username(""), publisher(""), author(""), isbn(""),
-	  price(0.0), page(0), available(true), ID(0),
-	  initialdate(""), returndate("")
+	: name(""), publisher(""), author(""), isbn(""), price(0.0), page(0),
+	  available(true), Username(""), ID(0), initialdate(""), returndate("")
 {
 	if (!checkISBN(isbn))
 	{
